@@ -299,7 +299,7 @@ class Model:
             else:
                 inputs = torch.as_tensor(inputs)
                 inputs.requires_grad_()
-            outputs_ = self.net(inputs)
+            outputs_ = self.net(inputs.float())
             # Data losses
             if targets is not None:
                 targets = torch.as_tensor(targets)
@@ -333,9 +333,14 @@ class Model:
             list(self.net.parameters()) + self.external_trainable_variables
         )
         if self.net.regularizer is None:
-            self.opt, self.lr_scheduler = optimizers.get(
-                trainable_variables, self.opt_name, learning_rate=lr, decay=decay
-            )
+            # self.opt, self.lr_scheduler = optimizers.get(
+            #     trainable_variables, self.opt_name, learning_rate=lr, decay=decay
+            # )
+            self.opt, _ = optimizers.get(
+                    trainable_variables,
+                    self.opt_name,
+                    learning_rate=lr)
+            self.lr_scheduler  = None # torch.optim.lr_scheduler.ExponentialLR(self.opt, gamma=0.9)
         else:
             if self.net.regularizer[0] == "l2":
                 self.opt, self.lr_scheduler = optimizers.get(
